@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Inject, Module, OnApplicationBootstrap } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AiModule } from "./ai/ai.module";
@@ -9,6 +9,14 @@ import { join } from "path";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { UsersModule } from "./users/users.module";
 import { User } from "./users/entities/user.entity";
+import {
+  CronExpression,
+  ScheduleModule,
+  SchedulerRegistry,
+} from "@nestjs/schedule";
+import { CronJob } from "cron";
+import { JobModule } from "./job/job.module";
+import { Job } from "./job/entities/job.entity";
 
 @Module({
   imports: [
@@ -49,11 +57,46 @@ import { User } from "./users/entities/user.entity";
       synchronize: true,
       connectorPackage: "mysql2",
       logging: true,
-      entities: [User],
+      entities: [User, Job],
     }),
     UsersModule,
+    ScheduleModule.forRoot(),
+    JobModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements OnApplicationBootstrap {
+  @Inject(SchedulerRegistry)
+  schedulerRegistry: SchedulerRegistry;
+
+  async onApplicationBootstrap() {
+    // //cron
+    // const job = new CronJob(CronExpression.EVERY_SECOND, () => {
+    //   console.log("run job");
+    // });
+    // this.schedulerRegistry.addCronJob("job1", job);
+    // job.start();
+    // setTimeout(() => {
+    //   this.schedulerRegistry.deleteCronJob("job1");
+    // }, 5000);
+    //
+    // //interval
+    // const intervalRef = setInterval(() => {
+    //   console.log("run interval job");
+    // }, 1000);
+    // this.schedulerRegistry.addInterval("interval1", intervalRef);
+    // setTimeout(() => {
+    //   this.schedulerRegistry.deleteInterval("interval1");
+    // }, 5000);
+    //
+    // //timeout
+    // const timeoutRef = setTimeout(() => {
+    //   console.log("run timeout job");
+    // }, 3000);
+    // this.schedulerRegistry.addTimeout("timeout1", timeoutRef);
+    // setTimeout(() => {
+    //   this.schedulerRegistry.deleteTimeout("timeout1");
+    // }, 5000);
+  }
+}
