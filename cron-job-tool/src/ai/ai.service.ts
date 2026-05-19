@@ -25,11 +25,13 @@ export class AiService {
     @Inject("QUERY_USER_TOOL") private readonly queryUserTool: any,
     @Inject("SEND_MAIL_TOOL") private sendMailTool: any,
     @Inject("WEB_SEARCH_TOOL") private webSearchTool: any,
+    @Inject("DB_USERS_CRUD_TOOL") private dbUsersCrudTool: any,
   ) {
     this.modelWidthTools = model.bindTools([
       this.queryUserTool,
       this.sendMailTool,
       this.webSearchTool,
+      this.dbUsersCrudTool,
     ]);
   }
 
@@ -79,6 +81,17 @@ export class AiService {
           case "web_search": {
             const result = await this.webSearchTool.invoke(toolCall.args);
             console.log(result);
+            messages.push(
+              new ToolMessage({
+                tool_call_id: toolId,
+                name: toolName,
+                content: result,
+              }),
+            );
+            break;
+          }
+          case "db_users_crud": {
+            const result = await this.dbUsersCrudTool.invoke(toolCall.args);
             messages.push(
               new ToolMessage({
                 tool_call_id: toolId,
@@ -152,6 +165,17 @@ export class AiService {
           case "web_search": {
             const result = await this.webSearchTool.invoke(toolCall.args);
             console.log(result);
+            messages.push(
+              new ToolMessage({
+                tool_call_id: toolCallId,
+                name: toolName,
+                content: result,
+              }),
+            );
+            break;
+          }
+          case "db_users_crud": {
+            const result = await this.dbUsersCrudTool.invoke(toolCall.args);
             messages.push(
               new ToolMessage({
                 tool_call_id: toolCallId,
